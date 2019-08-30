@@ -7,8 +7,8 @@
         "mixins.toomanycrashes.json"
     ],
     "entrypoints": {
-        "client": [
-            "org.dimdev.EntryLogger"
+        "main": [
+            "org.dimdev.toomanycrashes.TooManyCrashes"
         ]
     }
 }

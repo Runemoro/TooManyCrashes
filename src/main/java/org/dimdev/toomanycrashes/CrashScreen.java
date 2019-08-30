@@ -10,51 +10,51 @@ import net.minecraft.util.crash.CrashReport;
 @Environment(EnvType.CLIENT)
 public class CrashScreen extends ProblemScreen {
 
-  public CrashScreen(CrashReport report) {
-    super(report);
-  }
-
-  @Override
-  public void init() {
-    super.init();
-    ButtonWidget mainMenuButton = new ButtonWidget(0, width / 2 - 155, height / 4 + 120 + 12, 150, I18n.translate("gui.toTitle"),
-        button -> minecraft.openScreen(new TitleScreen()));
-
-    if (ModConfig.instance().disableReturnToMainMenu) {
-      mainMenuButton.active = false;
-      mainMenuButton.setMessage(I18n.translate("toomanycrashes.gui.disabledByConfig"));
+    public CrashScreen(CrashReport report) {
+        super(report);
     }
 
-    addButton(mainMenuButton);
-  }
+    @Override
+    public void init() {
+        super.init();
+        ButtonWidget mainMenuButton = new ButtonWidget(width / 2 - 155, height / 4 + 120 + 12, 150, 20, I18n.translate("gui.toTitle"),
+                button -> minecraft.openScreen(new TitleScreen()));
+
+        if (ModConfig.instance().disableReturnToMainMenu) {
+            mainMenuButton.active = false;
+            mainMenuButton.setMessage(I18n.translate("toomanycrashes.gui.disabledByConfig"));
+        }
+
+        addButton(mainMenuButton);
+    }
 
 
-  @Override
-  public void render(int mouseX, int mouseY, float partialTicks) { // TODO: localize number of lines
-    renderBackground();
-    drawCenteredString(font, I18n.translate("toomanycrashes.crashscreen.title"), width / 2, height / 4 - 40, 0xFFFFFF);
+    @Override
+    public void render(int mouseX, int mouseY, float partialTicks) { // TODO: localize number of lines
+        renderBackground();
+        drawCenteredString(font, I18n.translate("toomanycrashes.crashscreen.title"), width / 2, height / 4 - 40, 0xFFFFFF);
 
-    int textColor = 0xD0D0D0;
-    int x = width / 2 - 155;
-    int y = height / 4;
+        int textColor = 0xD0D0D0;
+        int x = width / 2 - 155;
+        int y = height / 4;
 
-    drawString(font, I18n.translate("toomanycrashes.crashscreen.summary"), x, y, textColor);
-    drawString(font, I18n.translate("toomanycrashes.crashscreen.paragraph1.line1"), x, y += 18, textColor);
+        drawString(font, I18n.translate("toomanycrashes.crashscreen.summary"), x, y, textColor);
+        drawString(font, I18n.translate("toomanycrashes.crashscreen.paragraph1.line1"), x, y += 18, textColor);
 
-    drawCenteredString(font, getModListString(), width / 2, y += 11, 0xE0E000);
+        drawCenteredString(font, getModListString(), width / 2, y += 11, 0xE0E000);
 
-    drawString(font, I18n.translate("toomanycrashes.crashscreen.paragraph2.line1"), x, y += 11, textColor);
-    drawString(font, I18n.translate("toomanycrashes.crashscreen.paragraph2.line2"), x, y += 9, textColor);
+        drawString(font, I18n.translate("toomanycrashes.crashscreen.paragraph2.line1"), x, y += 11, textColor);
+        drawString(font, I18n.translate("toomanycrashes.crashscreen.paragraph2.line2"), x, y += 9, textColor);
 
-    String fileNameString =
-        report.getFile() != null ? "\u00A7n" + report.getFile().getName() : I18n.translate("toomanycrashes.crashscreen.reportSaveFailed");
-    drawCenteredString(font, fileNameString, width / 2, y += 11, 0x00FF00);
+        String fileNameString =
+                report.getFile() != null ? "\u00A7n" + report.getFile().getName() : I18n.translate("toomanycrashes.crashscreen.reportSaveFailed");
+        drawCenteredString(font, fileNameString, width / 2, y += 11, 0x00FF00);
 
-    drawString(font, I18n.translate("toomanycrashes.crashscreen.paragraph3.line1"), x, y += 12, textColor);
-    drawString(font, I18n.translate("toomanycrashes.crashscreen.paragraph3.line2"), x, y += 9, textColor);
-    drawString(font, I18n.translate("toomanycrashes.crashscreen.paragraph3.line3"), x, y += 9, textColor);
-    drawString(font, I18n.translate("toomanycrashes.crashscreen.paragraph3.line4"), x, y + 9, textColor);
+        drawString(font, I18n.translate("toomanycrashes.crashscreen.paragraph3.line1"), x, y += 12, textColor);
+        drawString(font, I18n.translate("toomanycrashes.crashscreen.paragraph3.line2"), x, y += 9, textColor);
+        drawString(font, I18n.translate("toomanycrashes.crashscreen.paragraph3.line3"), x, y += 9, textColor);
+        drawString(font, I18n.translate("toomanycrashes.crashscreen.paragraph3.line4"), x, y + 9, textColor);
 
-    super.render(mouseX, mouseY, partialTicks);
-  }
+        super.render(mouseX, mouseY, partialTicks);
+    }
 }

@@ -27,17 +27,22 @@ import java.util.Set;
 @Mixin(value = CrashReport.class, priority = 500)
 public abstract class MixinCrashReport implements PatchedCrashReport {
 
+    private static final boolean ANNOYING_EASTER_EGG_DISABLED = true;
     @Shadow @Final private CrashReportSection systemDetailsSection;
     @Shadow @Final private List<CrashReportSection> otherSections;
     @Shadow @Final private Throwable cause;
     @Shadow @Final private String message;
+    private Set<ModMetadata> suspectedMods = null;
 
     @Shadow private static String generateWittyComment() {
         return null;
     }
 
-    private static final boolean ANNOYING_EASTER_EGG_DISABLED = true;
-    private Set<ModMetadata> suspectedMods = null;
+    private static String stacktraceToString(Throwable cause) {
+        StringWriter writer = new StringWriter();
+        cause.printStackTrace(new PrintWriter(writer));
+        return writer.toString();
+    }
 
     @Override
     public Set<ModMetadata> getSuspectedMods() {
@@ -101,12 +106,6 @@ public abstract class MixinCrashReport implements PatchedCrashReport {
         builder.append("\n\n");
         addStackTrace(builder);
         return builder.toString().replace("\t", "    ");
-    }
-
-    private static String stacktraceToString(Throwable cause) {
-        StringWriter writer = new StringWriter();
-        cause.printStackTrace(new PrintWriter(writer));
-        return writer.toString();
     }
 
     /**

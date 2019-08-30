@@ -15,6 +15,7 @@ import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(Keyboard.class)
 public abstract class MixinKeyboard {
+
     @Shadow @Final private MinecraftClient client;
     @Shadow private long debugCrashStartTime;
 

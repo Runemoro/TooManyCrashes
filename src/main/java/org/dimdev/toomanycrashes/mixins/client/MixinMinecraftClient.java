@@ -31,6 +31,7 @@ import org.apache.logging.log4j.Logger;
 import org.dimdev.toomanycrashes.CrashScreen;
 import org.dimdev.toomanycrashes.CrashUtils;
 import org.dimdev.toomanycrashes.InitErrorScreen;
+import org.dimdev.toomanycrashes.PatchedClient;
 import org.dimdev.toomanycrashes.StateManager;
 import org.dimdev.utils.GlUtil;
 import org.spongepowered.asm.mixin.Final;
@@ -44,55 +45,62 @@ import java.util.concurrent.CompletableFuture;
 
 @Mixin(MinecraftClient.class)
 @SuppressWarnings("StaticVariableMayNotBeInitialized")
-public abstract class MixinMinecraftClient extends NonBlockingThreadExecutor<Runnable> {
+public abstract class MixinMinecraftClient extends NonBlockingThreadExecutor<Runnable> implements PatchedClient {
 
+    @Shadow public static byte[] memoryReservedForCrash;
+    @Shadow @Final public static Identifier DEFAULT_TEXT_RENDERER_ID;
+    @Shadow @Final public static boolean IS_SYSTEM_MAC;
     // @formatter:off
     @Shadow @Final private static Logger LOGGER;
-    @Shadow volatile boolean isRunning;
-    @Shadow private boolean crashed;
-    @Shadow private CrashReport crashReport;
-    @Shadow public static byte[] memoryReservedForCrash;
     @Shadow public GameOptions options;
     @Shadow public InGameHud inGameHud;
     @Shadow public Screen currentScreen;
     @Shadow public TextureManager textureManager;
     @Shadow public TextRenderer textRenderer;
+//    @Shadow public abstract void method_1550(ClientWorld world, Gui loadingGui);
+    @Shadow public Window window;
+    @Shadow public Mouse mouse;
+    @Shadow @Final public File runDirectory;
+    @Shadow public Keyboard keyboard;
+    @Shadow volatile boolean isRunning;
+    @Shadow private boolean crashed;
+    @Shadow private CrashReport crashReport;
     @Shadow private int attackCooldown;
     @Shadow private GlFramebuffer framebuffer;
     @Shadow private ReloadableResourceManager resourceManager;
     @Shadow private SoundManager soundManager;
     @Shadow private LanguageManager languageManager;
-    @Shadow private void init() {}
-    @Shadow public void openScreen(Screen gui) {}
-    @Shadow public CrashReport populateCrashReport(CrashReport report) { return null; }
-    @Shadow public void close() {}
-    @Shadow public abstract ClientPlayNetworkHandler getNetworkHandler();
-    @Shadow public abstract void updateDisplay(boolean respectFramerateLimit);
-    @Shadow protected abstract void render(boolean boolean_1);
-//    @Shadow public abstract void method_1550(ClientWorld world, Gui loadingGui);
-    @Shadow public Window window;
     @Shadow private FontManager fontManager;
-    @Shadow public abstract CompletableFuture<Void> reloadResources();
-    @Shadow public Mouse mouse;
-    @Shadow public abstract boolean forcesUnicodeFont();
-    @Shadow @Final public static Identifier DEFAULT_TEXT_RENDERER_ID;
-    @Shadow public abstract void stop();
-    // @formatter:on
-
-    @Shadow @Final public static boolean IS_SYSTEM_MAC;
-    @Shadow @Final public File runDirectory;
-    @Shadow public Keyboard keyboard;
     @Shadow @Final private ResourcePackContainerManager<ClientResourcePackContainer> resourcePackContainerManager;
     @Shadow @Final private Queue<Runnable> renderTaskQueue;
-
-    @Shadow public abstract void disconnect(Screen screen);
-
     private int clientCrashCount = 0;
     private int serverCrashCount = 0;
-
     public MixinMinecraftClient(String string_1) {
         super(string_1);
     }
+
+    @Shadow private void init() {}
+
+    @Shadow public void openScreen(Screen gui) {}
+    // @formatter:on
+
+    @Shadow public CrashReport populateCrashReport(CrashReport report) { return null; }
+
+    @Shadow public void close() {}
+
+    @Shadow public abstract ClientPlayNetworkHandler getNetworkHandler();
+
+    @Shadow public abstract void updateDisplay(boolean respectFramerateLimit);
+
+    @Shadow protected abstract void render(boolean boolean_1);
+
+    @Shadow public abstract CompletableFuture<Void> reloadResources();
+
+    @Shadow public abstract boolean forcesUnicodeFont();
+
+    @Shadow public abstract void stop();
+
+    @Shadow public abstract void disconnect(Screen screen);
 
     /**
      * @author runemoro
@@ -101,51 +109,35 @@ public abstract class MixinMinecraftClient extends NonBlockingThreadExecutor<Run
      */
     @Overwrite
     public void start() {
-        isRunning = true;
-
-        try {
-            init();
-        } catch (Throwable throwable) {
-            // TODO: Error screen for crashes during Bootstrap.initialize() too
-            CrashReport report = CrashReport.create(throwable, "Initializing game");
-            report.addElement("Initialization");
-            displayInitErrorScreen(populateCrashReport(report));
-            return;
-        }
-
-        try {
-            while (isRunning) {
-                if (!crashed || crashReport == null) {
-                    try {
-                        render(true);
-                    } catch (CrashException e) {
-                        clientCrashCount++;
-                        populateCrashReport(e.getReport());
-                        addInfoToCrash(e.getReport());
-                        resetGameState();
-                        LOGGER.fatal("Reported exception thrown!", e);
-                        displayCrashScreen(e.getReport());
-                    } catch (Throwable e) {
-                        clientCrashCount++;
-                        CrashReport report = new CrashReport("Unexpected error", e);
-
-                        populateCrashReport(report);
-                        addInfoToCrash(report);
-                        resetGameState();
-                        LOGGER.fatal("Unreported exception thrown!", e);
-                        displayCrashScreen(report);
-                    }
-                } else {
-                    serverCrashCount++;
-                    addInfoToCrash(crashReport);
+        while (isRunning) {
+            if (!crashed || crashReport == null) {
+                try {
+                    render(true);
+                } catch (CrashException e) {
+                    clientCrashCount++;
+                    populateCrashReport(e.getReport());
+                    addInfoToCrash(e.getReport());
                     resetGameState();
-                    displayCrashScreen(crashReport);
-                    crashed = false;
-                    crashReport = null;
+                    LOGGER.fatal("Reported exception thrown!", e);
+                    displayCrashScreen(e.getReport());
+                } catch (Throwable e) {
+                    clientCrashCount++;
+                    CrashReport report = new CrashReport("Unexpected error", e);
+
+                    populateCrashReport(report);
+                    addInfoToCrash(report);
+                    resetGameState();
+                    LOGGER.fatal("Unreported exception thrown!", e);
+                    displayCrashScreen(report);
                 }
+            } else {
+                serverCrashCount++;
+                addInfoToCrash(crashReport);
+                resetGameState();
+                displayCrashScreen(crashReport);
+                crashed = false;
+                crashReport = null;
             }
-        } finally {
-            close();
         }
     }
 
@@ -154,6 +146,7 @@ public abstract class MixinMinecraftClient extends NonBlockingThreadExecutor<Run
         report.getSystemDetailsSection().add("Integrated Server Crashes Since Restart", () -> String.valueOf(serverCrashCount));
     }
 
+    @Override
     public void displayInitErrorScreen(CrashReport report) {
         CrashUtils.outputReport(report);
 
