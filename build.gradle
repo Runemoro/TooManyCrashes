@@ -4,7 +4,7 @@ buildscript {
         maven { url = 'https://maven.fabricmc.net/' }
     }
     dependencies {
-        classpath "net.fabricmc:fabric-loom:0.2.0-SNAPSHOT"
+        classpath "net.fabricmc:fabric-loom:0.2.4-SNAPSHOT"
     }
 }
 
@@ -15,10 +15,10 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 dependencies {
-    minecraft "com.mojang:minecraft:19w02a"
-    mappings "net.fabricmc:yarn:19w02a.20"
-    modCompile "net.fabricmc:fabric-loader:0.3.2.93"
-    modCompile "net.fabricmc:fabric:0.1.4.71"
+    minecraft "com.mojang:minecraft:19w35a"
+    mappings "net.fabricmc:yarn:19w35a+build.1"
+    modCompile "net.fabricmc:fabric-loader:0.6.0+build.163"
+    modCompile "net.fabricmc.fabric-api:fabric-api:0.3.2+build.217-1.15"
 }
 
 def travisBuildNumber = System.getenv("TRAVIS_BUILD_NUMBER")

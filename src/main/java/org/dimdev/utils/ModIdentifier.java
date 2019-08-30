@@ -1,22 +1,30 @@
 package org.dimdev.utils;
 
-import net.fabricmc.loader.FabricLoader;
-import net.fabricmc.loader.ModContainer;
-import net.fabricmc.loader.ModInfo;
+import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.ModContainer;
+import net.fabricmc.loader.api.metadata.ModMetadata;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.*;
+import java.nio.file.Path;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 
 public final class ModIdentifier {
+
     private static final Logger LOGGER = LogManager.getLogger();
 
-    public static Set<ModInfo> identifyFromStacktrace(Throwable e) {
-        Map<File, Set<ModInfo>> modMap = makeModMap();
+    public static Set<ModMetadata> identifyFromStacktrace(Throwable e) {
+        Map<File, Set<ModMetadata>> modMap = makeModMap();
 
         // Get the set of classes
         Set<String> classes = new LinkedHashSet<>();
@@ -27,22 +35,26 @@ public final class ModIdentifier {
             e = e.getCause();
         }
 
-        Set<ModInfo> mods = new LinkedHashSet<>();
+        Set<ModMetadata> mods = new LinkedHashSet<>();
         for (String className : classes) {
-            Set<ModInfo> classMods = identifyFromClass(className, modMap);
-            if (classMods != null) mods.addAll(classMods);
+            Set<ModMetadata> classMods = identifyFromClass(className, modMap);
+            if (classMods != null) {
+                mods.addAll(classMods);
+            }
         }
         return mods;
     }
 
-    public static Set<ModInfo> identifyFromClass(String className) {
+    public static Set<ModMetadata> identifyFromClass(String className) {
         return identifyFromClass(className, makeModMap());
     }
 
     // TODO: get a list of mixin transformers that affected the class and blame those too
-    private static Set<ModInfo> identifyFromClass(String className, Map<File, Set<ModInfo>> modMap) {
+    private static Set<ModMetadata> identifyFromClass(String className, Map<File, Set<ModMetadata>> modMap) {
         // Skip identification for Mixin, one's mod copy of the library is shared with all other mods
-        if (className.startsWith("org.spongepowered.asm.mixin.")) return Collections.emptySet();
+        if (className.startsWith("org.spongepowered.asm.mixin.")) {
+            return Collections.emptySet();
+        }
 
         // Get the URL of the class
         URL url = ModIdentifier.class.getResource(className);
@@ -52,26 +64,36 @@ public final class ModIdentifier {
         }
 
         // Get the mod containing that class
-        try {
-            if (url.getProtocol().equals("jar")) url = new URL(url.getFile().substring(0, url.getFile().indexOf('!')));
-            return modMap.get(new File(url.toURI()).getCanonicalFile());
-        } catch (URISyntaxException | IOException e) {
-            throw new RuntimeException(e);
-        }
+        return modMap.get(jarFromUrl(url));
     }
 
-    private static Map<File, Set<ModInfo>> makeModMap() {
-        Map<File, Set<ModInfo>> modMap = new HashMap<>();
-        for (ModContainer mod : FabricLoader.INSTANCE.getModContainers()) {
-            Set<ModInfo> currentMods = modMap.getOrDefault(mod.getOriginFile(), new HashSet<>());
-            currentMods.add(mod.getInfo());
-            try {
-                modMap.put(mod.getOriginFile().getCanonicalFile(), currentMods);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+    private static Map<File, Set<ModMetadata>> makeModMap() {
+        Map<File, Set<ModMetadata>> modMap = new HashMap<>();
+        for (ModContainer mod : FabricLoader.getInstance().getAllMods()) {
+            File modJar = jarFromPath(mod.getRootPath());
+            Set<ModMetadata> currentMods = modMap.computeIfAbsent(modJar, f -> new HashSet<>());
+            currentMods.add(mod.getMetadata());
         }
 
         return modMap;
+    }
+
+    private static File jarFromPath(Path path) {
+        try {
+            return jarFromUrl(path.toUri().toURL());
+        } catch (MalformedURLException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    private static File jarFromUrl(URL url) {
+        try {
+            if (url.getProtocol().equals("jar")) {
+                url = new URL(url.getFile().substring(0, url.getFile().indexOf('!')));
+            }
+            return new File(url.toURI()).getCanonicalFile();
+        } catch (URISyntaxException | IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

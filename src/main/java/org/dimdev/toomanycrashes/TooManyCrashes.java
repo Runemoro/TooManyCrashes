@@ -17,7 +17,7 @@ public class TooManyCrashes {
     public static void init() {
         ModConfig.instance();
         trustIdenTrust();
-        initStacktraceDeobfuscator();
+        //initStacktraceDeobfuscator();
     }
 
     private static void trustIdenTrust() {

@@ -1,7 +1,5 @@
 package org.dimdev.toomanycrashes;
 
-import net.fabricmc.tinyremapper.TinyUtils;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -14,14 +12,14 @@ public final class StacktraceDeobfuscator {
     public static void init() {
         Map<String, String> mappings = new HashMap<>();
         try (BufferedReader mappingReader = new BufferedReader(new InputStreamReader(StacktraceDeobfuscator.class.getClassLoader().getResourceAsStream(MAPPINGS)))) {
-            TinyUtils.read(
-                    mappingReader,
-                    "intermediary",
-                    "named",
-                    (key, value) -> mappings.put(key.replace('/', '.'), value.replace('/', '.')),
-                    (intermediary, named) -> mappings.put(intermediary.name, named.name),
-                    (intermediary, named) -> mappings.put(intermediary.name, named.name)
-            );
+//            TinyUtils.read(
+//                    mappingReader,
+//                    "intermediary",
+//                    "named",
+//                    (key, value) -> mappings.put(key.replace('/', '.'), value.replace('/', '.')),
+//                    (intermediary, named) -> mappings.put(intermediary.name, named.name),
+//                    (intermediary, named) -> mappings.put(intermediary.name, named.name)
+//            ); todo no more named
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

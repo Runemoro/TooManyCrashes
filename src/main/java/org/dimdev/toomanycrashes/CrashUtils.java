@@ -26,7 +26,7 @@ public final class CrashUtils {
             if (report.getFile() == null) {
                 String reportName = "crash-";
                 reportName += new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss").format(new Date());
-                reportName += MinecraftClient.getInstance().isMainThread() ? "-client" : "-server";
+                reportName += MinecraftClient.getInstance().isOnThread() ? "-client" : "-server";
                 reportName += ".txt";
 
                 File reportsDir = isClient ? new File(MinecraftClient.getInstance().runDirectory, "crash-reports") : new File("crash-reports");

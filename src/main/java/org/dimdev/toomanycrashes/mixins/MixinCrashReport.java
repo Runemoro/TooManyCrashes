@@ -1,6 +1,6 @@
 package org.dimdev.toomanycrashes.mixins;
 
-import net.fabricmc.loader.ModInfo;
+import net.fabricmc.loader.api.metadata.ModMetadata;
 import net.minecraft.util.crash.CrashReport;
 import net.minecraft.util.crash.CrashReportSection;
 import org.apache.commons.lang3.StringUtils;
@@ -26,17 +26,21 @@ import java.util.Set;
 
 @Mixin(value = CrashReport.class, priority = 500)
 public abstract class MixinCrashReport implements PatchedCrashReport {
+
     @Shadow @Final private CrashReportSection systemDetailsSection;
     @Shadow @Final private List<CrashReportSection> otherSections;
     @Shadow @Final private Throwable cause;
     @Shadow @Final private String message;
-    @Shadow private static String generateWittyComment() { return null; }
+
+    @Shadow private static String generateWittyComment() {
+        return null;
+    }
 
     private static final boolean ANNOYING_EASTER_EGG_DISABLED = true;
-    private Set<ModInfo> suspectedMods = null;
+    private Set<ModMetadata> suspectedMods = null;
 
     @Override
-    public Set<ModInfo> getSuspectedMods() {
+    public Set<ModMetadata> getSuspectedMods() {
         return suspectedMods;
     }
 
@@ -59,7 +63,7 @@ public abstract class MixinCrashReport implements PatchedCrashReport {
 
                 String modListString = "Unknown";
                 List<String> modNames = new ArrayList<>();
-                for (ModInfo mod : suspectedMods) {
+                for (ModMetadata mod : suspectedMods) {
                     modNames.add(mod.getName() + " (" + mod.getId() + ")");
                 }
 
@@ -81,13 +85,14 @@ public abstract class MixinCrashReport implements PatchedCrashReport {
         StringBuilder builder = new StringBuilder();
 
         builder.append("---- Minecraft Crash Report ----\n")
-               .append("// ").append(ANNOYING_EASTER_EGG_DISABLED ? generateWittyComment() : generateEasterEggComment())
-               .append("\n\n")
-               .append("Time: ").append(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z").format(new Date())).append("\n")
-               .append("Description: ").append(message)
-               .append("\n\n")
-               .append(stacktraceToString(cause).replace("\t", "    ")) // Vanilla's getCauseStackTraceOrString doesn't print causes and suppressed exceptions
-               .append("\n\nA detailed walkthrough of the error, its code path and all known details is as follows:\n");
+                .append("// ").append(ANNOYING_EASTER_EGG_DISABLED ? generateWittyComment() : generateEasterEggComment())
+                .append("\n\n")
+                .append("Time: ").append(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z").format(new Date())).append("\n")
+                .append("Description: ").append(message)
+                .append("\n\n")
+                .append(stacktraceToString(cause)
+                        .replace("\t", "    ")) // Vanilla's getCauseStackTraceOrString doesn't print causes and suppressed exceptions
+                .append("\n\nA detailed walkthrough of the error, its code path and all known details is as follows:\n");
 
         for (int i = 0; i < 87; i++) {
             builder.append("-");
@@ -122,13 +127,16 @@ public abstract class MixinCrashReport implements PatchedCrashReport {
             String comment = generateWittyComment();
 
             if (comment.contains("Dinnerbone")) {
-                ModInfo mod = suspectedMods.iterator().next();
-                String author = mod.getAuthors().get(0).getName();
-                comment = comment.replace("Dinnerbone", author);
+                ModMetadata mod = suspectedMods.iterator().next();
+                if (!mod.getAuthors().isEmpty()) {
+                    String author = mod.getAuthors().iterator().next().getName();
+                    comment = comment.replace("Dinnerbone", author);
+                }
             }
 
             return comment;
-        } catch (Throwable ignored) {}
+        } catch (Throwable ignored) {
+        }
 
         return generateWittyComment();
     }
