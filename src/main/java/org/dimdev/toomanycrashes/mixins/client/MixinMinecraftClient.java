@@ -28,9 +28,9 @@ import net.minecraft.util.NonBlockingThreadExecutor;
 import net.minecraft.util.crash.CrashException;
 import net.minecraft.util.crash.CrashReport;
 import org.apache.logging.log4j.Logger;
-import org.dimdev.toomanycrashes.CrashScreenGui;
+import org.dimdev.toomanycrashes.CrashScreen;
 import org.dimdev.toomanycrashes.CrashUtils;
-import org.dimdev.toomanycrashes.InitErrorScreenGui;
+import org.dimdev.toomanycrashes.InitErrorScreen;
 import org.dimdev.toomanycrashes.StateManager;
 import org.dimdev.utils.GlUtil;
 import org.spongepowered.asm.mixin.Final;
@@ -160,7 +160,7 @@ public abstract class MixinMinecraftClient extends NonBlockingThreadExecutor<Run
         try {
             GlUtil.resetState();
             isRunning = true;
-            runGUILoop(new InitErrorScreenGui(report));
+            runGUILoop(new InitErrorScreen(report));
         } catch (Throwable t) {
             LOGGER.error("An uncaught exception occured while displaying the init error screen, making normal report instead", t);
             printCrashReport(report);
@@ -228,7 +228,7 @@ public abstract class MixinMinecraftClient extends NonBlockingThreadExecutor<Run
             inGameHud.getChatHud().clear(true);
 
             // Display the crash screen
-            runGUILoop(new CrashScreenGui(report));
+            runGUILoop(new CrashScreen(report));
         } catch (Throwable t) {
             // The crash screen has crashed. Report it normally instead.
             LOGGER.error("An uncaught exception occured while displaying the crash screen, making normal report instead", t);

@@ -59,7 +59,7 @@ public final class ModIdentifier {
         // Get the URL of the class
         URL url = ModIdentifier.class.getResource(className);
         if (url == null) {
-            LOGGER.warn("Failed to identify " + className);
+            LOGGER.warn("Failed to identify mod for " + className);
             return Collections.emptySet();
         }
 

@@ -20,7 +20,7 @@ import org.apache.logging.log4j.Logger;
 import org.dimdev.utils.HasteUpload;
 
 @Environment(EnvType.CLIENT)
-public abstract class ProblemScreenGui extends Screen {
+public abstract class ProblemScreen extends Screen {
 
   private static final Logger LOGGER = LogManager.getLogger();
 
@@ -28,7 +28,7 @@ public abstract class ProblemScreenGui extends Screen {
   private String hasteLink = null;
   private String modListString = null;
 
-  protected ProblemScreenGui(CrashReport report) {
+  protected ProblemScreen(CrashReport report) {
     super(new LiteralText(""));
     this.report = report;
   }
@@ -45,7 +45,7 @@ public abstract class ProblemScreenGui extends Screen {
         //noinspection JavaReflectionMemberAccess
         uriField = Screen.class.getDeclaredField("clickedLink");
         uriField.setAccessible(true);
-        uriField.set(ProblemScreenGui.this, new URI(hasteLink));
+        uriField.set(ProblemScreen.this, new URI(hasteLink));
         minecraft.openScreen(new ConfirmChatLinkScreen(b -> {
         }, hasteLink, false));
       } catch (Throwable e) {

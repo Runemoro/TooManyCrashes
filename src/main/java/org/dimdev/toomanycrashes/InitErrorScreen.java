@@ -7,9 +7,9 @@ import net.minecraft.client.resource.language.I18n;
 import net.minecraft.util.crash.CrashReport;
 
 @Environment(EnvType.CLIENT)
-public class InitErrorScreenGui extends ProblemScreenGui {
+public class InitErrorScreen extends ProblemScreen {
 
-    public InitErrorScreenGui(CrashReport report) {
+    public InitErrorScreen(CrashReport report) {
         super(report);
     }
 

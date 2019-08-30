@@ -1,8 +1,14 @@
 {
-  "id": "toomanycrashes",
-  "name": "TooManyCrashes",
-  "version": "1.0",
-  "mixins": {
-    "common": "mixins.toomanycrashes.json"
-  }
+    "schemaVersion": 1,
+    "id": "toomanycrashes",
+    "name": "TooManyCrashes",
+    "version": "1.0",
+    "mixins": [
+        "mixins.toomanycrashes.json"
+    ],
+    "entrypoints": {
+        "client": [
+            "org.dimdev.EntryLogger"
+        ]
+    }
 }

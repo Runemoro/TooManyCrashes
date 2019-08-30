@@ -45,7 +45,7 @@ public class MixinCrashReportSection {
      * @reason Disable stack trace pruning, deobfuscate stack trace
      */
     @Overwrite
-    public int method_579(int prune) {
+    public int trimStackTrace(int prune) {
         stackTrace = StacktraceDeobfuscator.deobfuscateStacktrace(Thread.currentThread().getStackTrace());
         return stackTrace.length;
     }
