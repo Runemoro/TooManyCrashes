@@ -8,10 +8,8 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -64,36 +62,34 @@ public final class ModIdentifier {
         }
 
         // Get the mod containing that class
-        return modMap.get(jarFromUrl(url));
+        try {
+            return modMap.get(jarFromUrl(url));
+        } catch (URISyntaxException | IOException ex) {
+            return Collections.emptySet(); // we cannot do it
+        }
     }
 
     private static Map<File, Set<ModMetadata>> makeModMap() {
         Map<File, Set<ModMetadata>> modMap = new HashMap<>();
         for (ModContainer mod : FabricLoader.getInstance().getAllMods()) {
-            File modJar = jarFromPath(mod.getRootPath());
-            Set<ModMetadata> currentMods = modMap.computeIfAbsent(modJar, f -> new HashSet<>());
-            currentMods.add(mod.getMetadata());
+            if (!(mod instanceof net.fabricmc.loader.ModContainer)) {
+                continue;
+            }
+            try {
+                File modJar = jarFromUrl(((net.fabricmc.loader.ModContainer) mod).getOriginUrl());
+                modMap.computeIfAbsent(modJar, f -> new HashSet<>()).add(mod.getMetadata());
+            } catch (URISyntaxException | IOException ignored) {
+                // cannot find jar, so bruh
+            }
         }
 
         return modMap;
     }
 
-    private static File jarFromPath(Path path) {
-        try {
-            return jarFromUrl(path.toUri().toURL());
-        } catch (MalformedURLException ex) {
-            throw new RuntimeException(ex);
+    private static File jarFromUrl(URL url) throws URISyntaxException, IOException {
+        if (url.getProtocol().equals("jar")) {
+            url = new URL(url.getFile().substring(0, url.getFile().indexOf('!')));
         }
-    }
-
-    private static File jarFromUrl(URL url) {
-        try {
-            if (url.getProtocol().equals("jar")) {
-                url = new URL(url.getFile().substring(0, url.getFile().indexOf('!')));
-            }
-            return new File(url.toURI()).getCanonicalFile();
-        } catch (URISyntaxException | IOException e) {
-            throw new RuntimeException(e);
-        }
+        return new File(url.toURI()).getCanonicalFile();
     }
 }
