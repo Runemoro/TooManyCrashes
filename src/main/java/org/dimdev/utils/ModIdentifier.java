@@ -87,7 +87,6 @@ public final class ModIdentifier {
     }
 
     private static URI jarFromUrl(URL url) throws URISyntaxException, IOException {
-        System.out.println("Looking up mod jar for " + url);
         if (url.getProtocol().equals("jar")) {
             url = new URL(url.getFile().substring(0, url.getFile().indexOf('!')));
         }
