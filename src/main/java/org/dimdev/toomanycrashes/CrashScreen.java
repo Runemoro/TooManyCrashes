@@ -2,10 +2,15 @@ package org.dimdev.toomanycrashes;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.resource.language.I18n;
+import net.minecraft.util.SystemUtil;
 import net.minecraft.util.crash.CrashReport;
+import net.minecraft.util.math.Box;
+
+import java.io.File;
 
 @Environment(EnvType.CLIENT)
 public class CrashScreen extends ProblemScreen {
@@ -46,9 +51,8 @@ public class CrashScreen extends ProblemScreen {
         drawString(font, I18n.translate("toomanycrashes.crashscreen.paragraph2.line1"), x, y += 11, textColor);
         drawString(font, I18n.translate("toomanycrashes.crashscreen.paragraph2.line2"), x, y += 9, textColor);
 
-        String fileNameString =
-                report.getFile() != null ? "\u00A7n" + report.getFile().getName() : I18n.translate("toomanycrashes.crashscreen.reportSaveFailed");
-        drawCenteredString(font, fileNameString, width / 2, y += 11, 0x00FF00);
+        drawFileNameString(y);
+        y += 11;
 
         drawString(font, I18n.translate("toomanycrashes.crashscreen.paragraph3.line1"), x, y += 12, textColor);
         drawString(font, I18n.translate("toomanycrashes.crashscreen.paragraph3.line2"), x, y += 9, textColor);

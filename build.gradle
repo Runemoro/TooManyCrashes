@@ -4,7 +4,7 @@ buildscript {
         maven { url = 'https://maven.fabricmc.net/' }
     }
     dependencies {
-        classpath "net.fabricmc:fabric-loom:0.2.4-SNAPSHOT"
+        classpath "net.fabricmc:fabric-loom:0.2.5-SNAPSHOT"
     }
 }
 
@@ -24,7 +24,7 @@ dependencies {
 def travisBuildNumber = System.getenv("TRAVIS_BUILD_NUMBER")
 def versionSuffix = travisBuildNumber != null ? travisBuildNumber : "SNAPSHOT"
 
-version "1.0"
+version "1.0.1"
 group "org.dimdev.toomanycrashes"
 archivesBaseName = "TooManyCrashes"
 

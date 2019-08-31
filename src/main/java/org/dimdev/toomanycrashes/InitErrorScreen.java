@@ -39,9 +39,8 @@ public class InitErrorScreen extends ProblemScreen {
         drawString(font, I18n.translate("toomanycrashes.crashscreen.paragraph2.line1"), x, y += 11, textColor);
         drawString(font, I18n.translate("toomanycrashes.crashscreen.paragraph2.line2"), x, y += 9, textColor);
 
-        drawCenteredString(font,
-                report.getFile() != null ? "\u00A7n" + report.getFile().getName() : I18n.translate("toomanycrashes.crashscreen.reportSaveFailed"),
-                width / 2, y += 11, 0x00FF00);
+        drawFileNameString(y);
+        y += 11;
 
         drawString(font, I18n.translate("toomanycrashes.initerrorscreen.paragraph3.line1"), x, y += 12, textColor);
         drawString(font, I18n.translate("toomanycrashes.initerrorscreen.paragraph3.line2"), x, y += 9, textColor);

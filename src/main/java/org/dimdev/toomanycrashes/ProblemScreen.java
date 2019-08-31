@@ -15,6 +15,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.dimdev.utils.HasteUpload;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.net.URI;
 import java.util.ArrayList;
@@ -29,6 +30,10 @@ public abstract class ProblemScreen extends Screen {
     protected final CrashReport report;
     private String hasteLink = null;
     private String modListString = null;
+    protected int xLeft = Integer.MAX_VALUE;
+    protected int xRight = Integer.MIN_VALUE;
+    protected int yTop = Integer.MAX_VALUE;
+    protected int yBottom = Integer.MIN_VALUE;
 
     protected ProblemScreen(CrashReport report) {
         super(new LiteralText(""));
@@ -64,6 +69,17 @@ public abstract class ProblemScreen extends Screen {
     }
 
     @Override
+    public boolean mouseClicked(double x, double y, int int_1) {
+        if (x >= xLeft && x <= xRight && y >= yTop && y <= yBottom) {
+            File file = report.getFile();
+            if (file != null) {
+                SystemUtil.getOperatingSystem().open(file);
+            }
+        }
+        return super.mouseClicked(x, y, int_1);
+    }
+
+    @Override
     public boolean shouldCloseOnEsc() {
         return false;
     }
@@ -85,5 +101,16 @@ public abstract class ProblemScreen extends Screen {
             }
         }
         return modListString;
+    }
+
+    protected void drawFileNameString(int y) {
+        String fileNameString =
+                report.getFile() != null ? "\u00A7n" + report.getFile().getName() : I18n.translate("toomanycrashes.crashscreen.reportSaveFailed");
+        int stLen = font.getStringWidth(fileNameString);
+        xLeft = width / 2 - stLen / 2;
+        xRight = width / 2 + stLen / 2;
+        drawString(font, fileNameString, xLeft, y += 11, 0x00FF00);
+        yTop = y;
+        yBottom = y + 10;
     }
 }
