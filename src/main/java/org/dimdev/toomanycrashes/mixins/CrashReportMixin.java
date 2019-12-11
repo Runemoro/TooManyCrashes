@@ -25,8 +25,7 @@ import java.util.List;
 import java.util.Set;
 
 @Mixin(value = CrashReport.class, priority = 500)
-public abstract class MixinCrashReport implements PatchedCrashReport {
-
+public abstract class CrashReportMixin implements PatchedCrashReport {
     private static final boolean ANNOYING_EASTER_EGG_DISABLED = true;
     @Shadow @Final private CrashReportSection systemDetailsSection;
     @Shadow @Final private List<CrashReportSection> otherSections;

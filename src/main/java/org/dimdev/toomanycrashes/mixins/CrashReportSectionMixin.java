@@ -11,31 +11,29 @@ import org.spongepowered.asm.mixin.Shadow;
 import java.util.List;
 
 @Mixin(CrashReportSection.class)
-public class MixinCrashReportSection {
-
+public class CrashReportSectionMixin {
     @Shadow @Final private String title;
     @Shadow @Final private List<?> elements;
     @Shadow private StackTraceElement[] stackTrace;
 
     /**
-     * @reason Disable stack trace pruning
+     * Disable stack trace trimming (causes confusing stack traces)
      */
     @Overwrite
-    public void method_580(int size) {
-    }
+    public void trimStackTraceEnd(int size) {}
 
     /**
-     * @reason Disable stack trace pruning, deobfuscate stack trace
+     * Disable stack trace pruning (causes confusing stack traces)
      */
     @Overwrite
-    public int trimStackTrace(int prune) {
+    public int initStackTrace(int prune) {
         stackTrace = StacktraceDeobfuscator.deobfuscateStacktrace(Thread.currentThread().getStackTrace());
         return stackTrace.length;
     }
 
     /**
-     * @reason Improve crash report formatting
-     **/
+     * Improve crash report formatting
+     */
     @Overwrite
     public void addStackTrace(StringBuilder builder) {
         builder.append("-- ").append(title).append(" --\n");
@@ -45,8 +43,8 @@ public class MixinCrashReportSection {
             String sectionIndent = "  ";
 
             builder.append(sectionIndent)
-                    .append(element.invokeGetName())
-                    .append(": ");
+                   .append(element.invokeGetName())
+                   .append(": ");
 
             StringBuilder indent = new StringBuilder(sectionIndent + "  ");
             for (char ignored : element.invokeGetName().toCharArray()) {

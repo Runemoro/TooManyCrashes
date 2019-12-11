@@ -7,19 +7,18 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 public final class CrashUtils {
-
     private static final Logger LOGGER = LogManager.getLogger("TMC");
-    private static boolean isClient;
+    private static boolean clientSide;
 
     static {
         try {
-            isClient = MinecraftClient.getInstance() != null;
+            clientSide = MinecraftClient.getInstance() != null;
         } catch (NoClassDefFoundError e) {
-            isClient = false;
+            clientSide = false;
         }
     }
 
@@ -27,8 +26,8 @@ public final class CrashUtils {
         try {
             if (report.getFile() == null) {
                 String reportName = "crash-";
-                reportName += new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss").format(new Date());
-                reportName += isClient && MinecraftClient.getInstance().isOnThread() ? "-client" : "-server";
+                reportName += LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                reportName += clientSide && MinecraftClient.getInstance().isOnThread() ? "-client" : "-server";
                 reportName += ".txt";
 
                 File reportsDir = new File(FabricLoader.getInstance().getGameDirectory(), "crash-reports");
@@ -40,8 +39,11 @@ public final class CrashUtils {
             LOGGER.fatal("Failed saving report", e);
         }
 
-        LOGGER.fatal("Minecraft ran into a problem! " + (report.getFile() != null ? "Report saved to: " + report.getFile() :
-                "Crash report could not be saved.") + "\n" +
-                report.asString());
+        LOGGER.fatal(
+                "Minecraft ran into a problem! " +
+                (report.getFile() != null ? "Report saved to: " + report.getFile() : "Crash report could not be saved.") +
+                "\n" +
+                report.asString()
+        );
     }
 }

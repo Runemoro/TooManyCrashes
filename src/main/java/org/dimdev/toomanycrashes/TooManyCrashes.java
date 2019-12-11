@@ -20,7 +20,7 @@ public class TooManyCrashes implements ModInitializer {
     public void onInitialize() {
         ModConfig.instance();
         trustIdenTrust();
-        //initStacktraceDeobfuscator();
+        initStacktraceDeobfuscator();
     }
 
     private void trustIdenTrust() {
@@ -35,15 +35,12 @@ public class TooManyCrashes implements ModInitializer {
     }
 
     private void initStacktraceDeobfuscator() {
-        LOGGER.info("Initializing StacktraceDeobfuscator");
         try {
             StacktraceDeobfuscator.init();
         } catch (Exception e) {
             LOGGER.error("Failed to load mappings!", e);
         }
-        LOGGER.info("Done initializing StacktraceDeobfuscator");
 
-        // Install the log exception deobfuscation rewrite policy
         DeobfuscatingRewritePolicy.install();
     }
 }

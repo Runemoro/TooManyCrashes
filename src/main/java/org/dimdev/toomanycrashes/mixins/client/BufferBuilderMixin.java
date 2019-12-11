@@ -9,14 +9,13 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(BufferBuilder.class)
-public abstract class MixinBufferBuilder implements StateManager.IResettable {
-
+public abstract class BufferBuilderMixin implements StateManager.Resettable {
     @Shadow private boolean building;
 
     @Shadow public abstract void end();
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    public void onInit(int bufferSizeIn, CallbackInfo ci) {
+    private void onInit(int bufferSizeIn, CallbackInfo ci) {
         register();
     }
 

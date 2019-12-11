@@ -3,33 +3,30 @@ buildscript {
         jcenter()
         maven { url = 'https://maven.fabricmc.net/' }
     }
+
     dependencies {
-        classpath "net.fabricmc:fabric-loom:0.2.5-SNAPSHOT"
+        classpath 'net.fabricmc:fabric-loom:0.2.6-SNAPSHOT'
     }
 }
 
 apply plugin: "java"
-apply plugin: net.fabricmc.loom.LoomGradlePlugin
+apply plugin: "fabric-loom"
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
-dependencies {
-    minecraft "com.mojang:minecraft:19w35a"
-    mappings "net.fabricmc:yarn:19w35a+build.1"
-    modCompile "net.fabricmc:fabric-loader:0.6.1+build.164"
-//    modCompile "net.fabricmc.fabric-api:fabric-api:0.3.2+build.217-1.15"
+repositories {
+    maven { url = 'https://maven.fabricmc.net/' }
 }
 
-def travisBuildNumber = System.getenv("TRAVIS_BUILD_NUMBER")
-def versionSuffix = travisBuildNumber != null ? travisBuildNumber : "SNAPSHOT"
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings "net.fabricmc:yarn:${project.yarn_version}"
+    modCompile "net.fabricmc:fabric-loader:${project.loader_version}"
+}
 
-version "1.0.1"
-group "org.dimdev.toomanycrashes"
-archivesBaseName = "TooManyCrashes"
-
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+version "1.0.2"
+archivesBaseName = "too-many-crashes"
 
 processResources {
     filesMatching("fabric.mod.json") {
@@ -39,12 +36,6 @@ processResources {
     inputs.property "version", project.version
 }
 
-task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier "sources"
-    from sourceSets.main.allSource
-}
-
 artifacts {
     archives jar
-    archives sourcesJar
 }

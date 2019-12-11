@@ -10,20 +10,21 @@ import net.minecraft.util.crash.CrashReport;
 import org.dimdev.toomanycrashes.PatchedIntegratedServer;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(Keyboard.class)
-public abstract class MixinKeyboard {
-
+public abstract class KeyboardMixin {
     @Shadow @Final private MinecraftClient client;
     @Shadow private long debugCrashStartTime;
 
     /**
-     * @reason Replaces the vanilla F3 + C logic to immediately crash rather than requiring
+     * Replaces the vanilla F3 + C logic to immediately crash rather than requiring
      * that the buttons are pressed for 6 seconds and add more crash types:
      * F3 + C - Client crash
-     * Ctrl + F3 + C - GL illegal access crash
+     * Ctrl + F3 + C - JVM crash
      * Alt + F3 + C - Integrated server crash
      * Shift + F3 + C - Scheduled client task exception
      * Alt + Shift + F3 + C - Scheduled server task exception
@@ -31,8 +32,8 @@ public abstract class MixinKeyboard {
      * Note: Left Shift + F3 + C doesn't work on most keyboards, see http://keyboardchecker.com/
      * Use the right shift instead.
      */
-    @Overwrite
-    public void pollDebugCrash() {
+    @Inject(method = "pollDebugCrash", at = @At("HEAD"), cancellable = true)
+    private void beforePollDebugCrash(CallbackInfo ci) {
         if (debugCrashStartTime > 0L && System.currentTimeMillis() - debugCrashStartTime >= 0) {
             // TODO: if the client crashes between F3 + C is pressed and pollDebugCrash is called,
             //       debugCrashStartTime isn't reset and the client will crash again when joining
@@ -40,7 +41,7 @@ public abstract class MixinKeyboard {
             debugCrashStartTime = -1;
 
             if (Screen.hasControlDown()) {
-                GlfwUtil.method_15973();
+                GlfwUtil.makeJvmCrash();
             } else if (Screen.hasShiftDown()) {
                 if (Screen.hasAltDown()) {
                     if (client.isIntegratedServerRunning()) {
@@ -56,12 +57,14 @@ public abstract class MixinKeyboard {
             } else {
                 if (Screen.hasAltDown()) {
                     if (client.isIntegratedServerRunning()) {
-                        ((PatchedIntegratedServer) client.getServer()).setCrashNextTick();
+                        ((PatchedIntegratedServer) client.getServer()).scheduleCrash();
                     }
                 } else {
                     throw new CrashException(new CrashReport("Manually triggered client-side debug crash", new Throwable()));
                 }
             }
         }
+
+        ci.cancel();
     }
 }

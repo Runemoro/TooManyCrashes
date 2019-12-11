@@ -11,14 +11,12 @@ import java.util.Set;
  * registered here.
  */
 public class StateManager {
-
-    // Use WeakReference to allow garbage collection, preventing memory leaks
-    private static Set<WeakReference<IResettable>> resettableRefs = new HashSet<>();
+    private static final Set<WeakReference<Resettable>> RESETTABLES = new HashSet<>();
 
     public static void resetStates() {
-        Iterator<WeakReference<IResettable>> iterator = resettableRefs.iterator();
+        Iterator<WeakReference<Resettable>> iterator = RESETTABLES.iterator();
         while (iterator.hasNext()) {
-            WeakReference<IResettable> ref = iterator.next();
+            WeakReference<Resettable> ref = iterator.next();
             if (ref.get() != null) {
                 ref.get().resetState();
             } else {
@@ -27,10 +25,9 @@ public class StateManager {
         }
     }
 
-    public interface IResettable {
-
+    public interface Resettable {
         default void register() {
-            resettableRefs.add(new WeakReference<>(this));
+            RESETTABLES.add(new WeakReference<>(this));
         }
 
         void resetState();

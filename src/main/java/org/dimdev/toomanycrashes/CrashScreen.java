@@ -2,15 +2,10 @@ package org.dimdev.toomanycrashes;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.resource.language.I18n;
-import net.minecraft.util.SystemUtil;
 import net.minecraft.util.crash.CrashReport;
-import net.minecraft.util.math.Box;
-
-import java.io.File;
 
 @Environment(EnvType.CLIENT)
 public class CrashScreen extends ProblemScreen {
@@ -23,7 +18,7 @@ public class CrashScreen extends ProblemScreen {
     public void init() {
         super.init();
         ButtonWidget mainMenuButton = new ButtonWidget(width / 2 - 155, height / 4 + 120 + 12, 150, 20, I18n.translate("gui.toTitle"),
-                button -> minecraft.openScreen(new TitleScreen()));
+                                                       button -> minecraft.openScreen(new TitleScreen()));
 
         if (ModConfig.instance().disableReturnToMainMenu) {
             mainMenuButton.active = false;
